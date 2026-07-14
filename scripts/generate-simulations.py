@@ -47,7 +47,9 @@ TAILLE = {
 }
 STADE = {
  "croissance": "croissance rapide: tout casse en même temps par paliers (~10/~30/~80 pers.); stabiliser les 3 flux porteurs AVANT d'accélérer; piège: recruter avant de standardiser (on duplique le chaos)",
+ "plateau": "plateau: le système s'est équilibré autour de ses frictions — elles sont devenues invisibles («c'est comme ça»); piège: confondre stabilité et santé; tester le mort, œil neuf",
  "crise": "crise: le cash domine, horizon en semaines; trier explicitement (protéger/couper/geler); piège: couper 10% partout — tuer les forces avec les faiblesses",
+ "transmission": "transmission/reprise: le savoir tacite est le risque n°1; les relations personnelles ne survivent pas seules au départ; 90 jours de transfert structuré, doublures",
 }
 
 def parse_cases():
@@ -84,12 +86,14 @@ def main():
         out.append(f"Symptôme noyau: « {k['sym']} » · Action noyau: {k['act']}")
         for t in ["P","M","G"]:
             mod = TAILLE[t].get(k['fcode'], TAILLE[t]["SP"])
-            out.append(f"- S-{k['id']}-{t} ({TAILLE[t]['label']}): {mod}. Réf: {k['file']} §{k['id']}")
-            n += 1
-        for s, stxt in STADE.items():
-            out.append(f"- S-{k['id']}-{s}: en {stxt}. Réf: modificateurs-stade.md")
-            n += 1
-    out.insert(4, f"# Volume: {len(ks)} noyaux × (3 tailles + 2 stades) = {n} simulations.")
+            for st, stxt in list(STADE.items()) + [(None, None)]:
+                sid = f"S-{k['id']}-{t}" + (f"-{st}" if st else "")
+                line = f"- {sid} ({TAILLE[t]['label']}{', '+st if st else ''}): {mod}."
+                if stxt: line += f" Contexte de stade: {stxt}."
+                line += f" Réf: {k['file']} §{k['id']}"
+                out.append(line)
+                n += 1
+    out.insert(4, f"# Volume: {len(ks)} noyaux × 3 tailles × (4 stades + neutre) = {n} coordonnées.")
     open(os.path.join(ROOT,"simulations","SIMULATIONS.md"),"w",encoding="utf-8").write("\n".join(out)+"\n")
     print(f"noyaux: {len(ks)} | simulations: {n}")
 

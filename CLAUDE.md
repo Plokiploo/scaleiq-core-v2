@@ -93,9 +93,23 @@ Definition of done:
 
 Prérequis (à demander à Jonathan si absent): ANTHROPIC_API_KEY dans .env.local.
 
+## Mission courante: GÉNÉRATION DES 5000 SIMULATIONS (D-019)
+1. Vérifier: `node scripts/generate-simulations-llm.mjs --target 50` (essai, ~0.20$).
+   Contrôler la qualité de 5 sorties dans knowledge/simulations/generated/*.jsonl
+   (réalisme, fausse piste tentante, invalidation honnête, variété).
+2. Si OK: `node scripts/generate-simulations-llm.mjs --target 5000`.
+   BUDGET DUR: 30 CAD (~21 USD). Le script s'arrête à 20 USD (MAX_COST_USD).
+   Il est résumable (relancer reprend où il s'est arrêté). Modèle: Haiku 4.5.
+3. Après génération: rapport (nombre, coût réel, échecs, 3 exemples cités),
+   dédup grossière (titres identiques), commit des .jsonl + rapport.
+4. Ne PAS injecter les 5000 au prompt du moteur — ils sont banc d'entraînement
+   sur disque. L'injection reste: patterns + modificateurs + INDEX (bornée).
+
 ## Ensuite (avec accord de Jonathan)
-- Phase 6: consolider la boucle validation/outcome (relances, suivi).
-- Auth + policies RLS avant toute exposition hors localhost.
+- Évaluation du moteur contre les simulations (le vrai « entraînement »):
+  faire tourner l'investigateur sur des simulations tirées au sort et mesurer
+  s'il retrouve la friction/cause — AVANT le premier cas réel.
+- Auth déjà en place; déploiement hors localhost quand Jonathan le demande.
 
 ## Escalade (STOP et demander à Jonathan/Ryokan)
 - Tout changement de mission ou de périmètre produit — sauf le point 7 de la

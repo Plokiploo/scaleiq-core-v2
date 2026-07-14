@@ -329,3 +329,23 @@ qu'énumération — la valeur est dans le plateau (dimensions) pas dans la list
 Doctrine préservée: statut candidate uniforme, invalidations héritées des
 noyaux, « l'expérience n'est pas une valeur absolue » en tête de fichier généré.
 Autorité: Jonathan (volume, dimensions taille), Ryokan (architecture compositionnelle).
+
+## D-019 (2026-07-14) Passage à 5000 simulations: pipeline de génération LLM
+Doctrine Jonathan: « la simulation est l'entraînement, le cas réel est la
+compétition ». Décision: au-delà de ~1500, la composition mécanique dilue;
+les 5000 seront des scénarios DISTINCTS écrits par LLM depuis les coordonnées
+de la matrice. Livré:
+- Grille déterministe v2: 104 noyaux × 3 tailles × (4 stades + neutre)
+  = 1560 coordonnées (SIMULATIONS.md).
+- `scripts/generate-simulations-llm.mjs`: génération résumable, concurrence 4,
+  validation de schéma (invalidation et fausse piste OBLIGATOIRES), dédup par
+  ID, ventilation par domaine (generated/*.jsonl), 8 secteurs × variations.
+- BUDGET: plafond utilisateur 30 CAD; plafond dur script 20 USD; modèle
+  Haiku 4.5 (qualité suffisante pour scénarios structurés courts, coût ÷3
+  vs Sonnet). Estimation 5000 sims ≈ 16 USD.
+- Exécution: sur la machine de Jonathan (clé API locale) via Claude Code —
+  la sandbox Ryokan n'a pas accès réseau à l'API. Essai 50 avant les 5000.
+- Les 5000 ne sont PAS injectées au prompt: banc d'entraînement sur disque.
+  Usage prévu: évaluation du moteur (retrouve-t-il la friction plantée?)
+  avant la première compétition réelle.
+Autorité: Jonathan (volume, budget), Ryokan (architecture, garde-fous).
