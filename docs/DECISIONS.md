@@ -33,3 +33,13 @@ Projet `scaleiq-core-v2` (ref ojuiaixjnsbhvwgkqzdp) créé dans l'org 2R Venture
 région ca-central-1, coût 0$/mois (free tier), Postgres 17. Migrations 0001+0002
 appliquées et vérifiées (12 tables, RLS actif partout). Types TypeScript générés
 depuis le schéma réel (lib/database.types.ts). Autorité: Jonathan (automatisation demandée).
+
+## D-007 (2026-07-13) Services Phase 3 — API serveur de la boucle
+10 routes app/api couvrant la boucle complète (organizations → engagements →
+diagnostics → interviews/turns → findings → analyses causales → recommandations
+→ outcomes), avec: transitions de statut forward-only validées côté serveur,
+findings IA exigeant une confiance explicite, évidence exigeant un niveau,
+liens évidence↔recommandation, journal decision_events sur chaque événement
+structurant. Schéma validé bout-en-bout par smoke test SQL (boucle complète
+insérée puis rollback; contrainte evidence_requires_level vérifiée en rejet).
+Autorité: Ryokan.

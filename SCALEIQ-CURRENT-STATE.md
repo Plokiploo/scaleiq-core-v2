@@ -51,8 +51,8 @@ owner/statut → dashboard de revue → enregistrer validation et outcome →
 conserver la trace de raisonnement complète.
 
 ## 8. Parcours utilisateur actuels
-Aucun. À construire dans l'ordre: Phase 1 (domaine) → 2 (intégrité) →
-3 (services) → 4 (UX minimale) → 5 (support IA avec provenance) → 6 (boucle outcome).
+API serveur de la boucle construite (Phase 3). UX (Phase 4) à venir. Ordre restant:
+4 (UX minimale) → 5 (support IA avec provenance) → 6 (boucle outcome).
 
 ## 9. Couverture de tests
 Aucune. Framework de test à introduire en Phase 2/3.
