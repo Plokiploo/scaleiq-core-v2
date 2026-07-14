@@ -43,3 +43,12 @@ liens évidence↔recommandation, journal decision_events sur chaque événement
 structurant. Schéma validé bout-en-bout par smoke test SQL (boucle complète
 insérée puis rollback; contrainte evidence_requires_level vérifiée en rejet).
 Autorité: Ryokan.
+
+## D-008 (2026-07-13) Interface Phase 4 minimale
+4 pages client (organisations → engagements → diagnostics → vue diagnostic
+complète). La vue diagnostic expose: statut + transition suivante, conditions
+actuelle/cible/écart, interviews et tours persistés, findings avec badge
+épistémique et provenance IA visible (avec % de confiance), analyses causales
+avec marquage friction dominante, recommandations liées à l'évidence, outcomes.
+Aucune lib UI: CSS minimal, clarté d'investigation > design décoratif (directive
+Phase 4). Autorité: Ryokan.
