@@ -32,7 +32,7 @@ function load() {
   while ((m = kernelRe.exec(md)) !== null)
     _kernels[m[1]] = { title: m[2].trim(), dom: m[3].trim(), fcode: m[4].trim(), sym: m[5], act: m[6] };
   _coords = [];
-  const coordRe = /^- (S-(C\d+)-[PMG](?:-\w+)?) \(([^)]+)\): ([\s\S]+?) Réf:/gm;
+  const coordRe = /^- (S-(C\d+)-[PMG](?:-\w+)?) \((.+?)\): ([\s\S]+?) Réf:/gm;
   while ((m = coordRe.exec(md)) !== null)
     _coords.push({ id: m[1], kernel: m[2], label: m[3], mod: m[4] });
 }
