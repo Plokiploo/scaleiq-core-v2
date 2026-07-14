@@ -107,7 +107,7 @@ export async function generateBatch(tier: Tier, batchSize: number) {
       const secteur = SECTEURS[(coord.id.length * 7 + item.seed * 13) % SECTEURS.length];
       try {
         const msg = await client.messages.create({
-          model: cfg.model, max_tokens: 700, system: SYSTEM,
+          model: cfg.model, max_tokens: 1200, system: SYSTEM,
           messages: [{ role: "user", content:
 `Coordonnée: ${coord.id} (${coord.label})
 Noyau: ${kernel.title} [${kernel.dom}, friction ${kernel.fcode}] — symptôme type: «${kernel.sym}» — action type: ${kernel.act}
@@ -118,14 +118,25 @@ Secteur imposé: ${secteur} (variation #${item.seed})
 {"id":"${item.id}","tier":"${tier}","titre":"...","entreprise":"nom + taille + secteur en une phrase","symptome":"citation du dirigeant","observations":["fait 1","fait 2","fait 3"],"fausse_piste":"...","friction":"${kernel.fcode}","cause_probable":"...","action":{"quoi":"...","owner":"...","delai":"..."},"validation":"signal mesurable","invalidation":"ce qui prouverait que ce diagnostic est faux","statut":"candidate"}` }],
         });
         const cost = (msg.usage.input_tokens * cfg.priceIn + msg.usage.output_tokens * cfg.priceOut) / 1e6;
-        const s2 = state(); s2.costUsd += cost; s2.byTier[tier] = (s2.byTier[tier] ?? 0) + 1; saveState(s2);
+        const s2 = state(); s2.costUsd += cost; saveState(s2);
         const text = msg.content.find((b) => b.type === "text");
         const raw = text && text.type === "text" ? text.text : "";
-        const json = JSON.parse(raw.slice(raw.indexOf("{"), raw.lastIndexOf("}") + 1));
-        if (!json.invalidation || !json.fausse_piste || !json.observations?.length) throw new Error("schéma incomplet");
-        appendFileSync(join(GEN, tier, `${kernel.dom}.jsonl`), JSON.stringify(json) + "\n");
-        generated++;
-      } catch { failed++; }
+        try {
+          const json = JSON.parse(raw.slice(raw.indexOf("{"), raw.lastIndexOf("}") + 1));
+          if (!json.invalidation || !json.fausse_piste || !json.observations?.length) throw new Error("schéma incomplet");
+          appendFileSync(join(GEN, tier, `${kernel.dom}.jsonl`), JSON.stringify(json) + "\n");
+          const s3 = state(); s3.byTier[tier] = (s3.byTier[tier] ?? 0) + 1; saveState(s3);
+          generated++;
+        } catch (pe) {
+          appendFileSync(join(GEN, "_errors.log"),
+            `${new Date().toISOString()} ${tier} ${item.id} PARSE: ${(pe as Error).message} RAW[0..300]: ${raw.slice(0, 300).replace(/\n/g, " ")}\n`);
+          failed++;
+        }
+      } catch (e) {
+        appendFileSync(join(GEN, "_errors.log"),
+          `${new Date().toISOString()} ${tier} ${item.id} API: ${(e as Error).message}\n`);
+        failed++;
+      }
     }
   }
   await Promise.all(Array.from({ length: CONC }, worker));
