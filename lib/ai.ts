@@ -15,8 +15,8 @@ function client(): Anthropic {
 // ---------- Corpus de connaissance (knowledge/, D-016) ----------
 // Distillat de livres versionné dans le repo. Doctrine: patterns = priors à
 // tester par les questions, jamais des conclusions. Chargé une fois par process.
-let _corpus: { patterns: string; cases: string } | null = null;
-function corpus(): { patterns: string; cases: string } {
+let _corpus: { patterns: string; cases: string; sims: string } | null = null;
+function corpus(): { patterns: string; cases: string; sims: string } {
   if (_corpus) return _corpus;
   const read = (rel: string): string => {
     try {
@@ -29,6 +29,8 @@ function corpus(): { patterns: string; cases: string } {
     patterns: ["patterns/frictions.md", "patterns/questions.md", "patterns/lois.md"]
       .map(read).filter(Boolean).join("\n\n"),
     cases: ["patterns/actions.md", "cases/seed-cases.md", "cases/INDEX.md"].map(read).filter(Boolean).join("\n\n"),
+    sims: ["simulations/MATRICE.md", "simulations/modificateurs-taille.md", "simulations/modificateurs-stade.md"]
+      .map(read).filter(Boolean).join("\n\n"),
   };
   return _corpus;
 }
@@ -154,7 +156,7 @@ function systemWithCorpus(kind: "questions" | "synthese"): string {
   const block =
     kind === "questions"
       ? c.patterns
-      : c.patterns + "\n\n" + c.cases;
+      : c.patterns + "\n\n" + c.cases + "\n\n" + c.sims;
   if (!block.trim()) return SYSTEM_PROMPT;
   return `${SYSTEM_PROMPT}\n\n${CORPUS_RULES}\n\n<corpus>\n${block}\n</corpus>`;
 }

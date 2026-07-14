@@ -306,3 +306,26 @@ Changed the World (Womack), It's Not Luck (Goldratt — thinking processes),
 The Checklist Manifesto (Gawande), Thinking Fast and Slow (Kahneman),
 The E-Myth Revisited (Gerber — franchise/PME terrain).
 Autorité: Jonathan (volume/périmètre), Ryokan (architecture).
+
+## D-018 (2026-07-14) Banque de simulations: 520 parties composées (objectif 500 dépassé)
+Demande Jonathan: 500 simulations minimum, petites/moyennes/grandes sociétés,
+approche « jeu de Go », carte blanche. Architecture retenue: COMPOSITION plutôt
+qu'énumération — la valeur est dans le plateau (dimensions) pas dans la liste.
+- `simulations/MATRICE.md`: 4 dimensions (10 frictions × 7 domaines × 3 tailles
+  × 4 stades) + règles de composition + 5 questions ouvertes (Under Observation).
+- `modificateurs-taille.md`: distillat central — comment chaque friction se
+  déforme à 1-15 / 15-100 / 100+ personnes (mécanisme, fausse piste, inflexion
+  d'action). Priors littérature: P→F7/bus factor, M→F3/interfaces, G→F9/systémique
+  (explicitement marqués à confronter au terrain, Q2).
+- `modificateurs-stade.md`: croissance (casse par paliers), plateau (frictions
+  invisibles), crise (cash + triage), transmission (savoir tacite).
+- `scripts/generate-simulations.py`: compose 104 noyaux × (3 tailles + 2 stades)
+  = 520 simulations référencées (S-Cx-P/M/G/croissance/crise), régénérables à
+  chaque évolution des noyaux ou modificateurs. SIMULATIONS.md vit sur disque
+  (référence), n'est PAS injecté au prompt.
+- Injection moteur (bornée): MATRICE + modificateurs ajoutés au bundle de
+  synthèse; le moteur lit désormais taille/stade de l'entreprise comme
+  dimensions de diagnostic.
+Doctrine préservée: statut candidate uniforme, invalidations héritées des
+noyaux, « l'expérience n'est pas une valeur absolue » en tête de fichier généré.
+Autorité: Jonathan (volume, dimensions taille), Ryokan (architecture compositionnelle).

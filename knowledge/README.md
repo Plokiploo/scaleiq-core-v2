@@ -30,6 +30,13 @@ ce distillat, versionné dans le repo.
   — banque étendue (104 cas au total, format compact)
 - `cases/INDEX.md` — index une-ligne-par-cas (injecté au moteur pour repérer
   les analogies; le fichier source contient le cas complet)
+- `simulations/MATRICE.md` — le plateau de jeu: dimensions (friction × domaine
+  × taille × stade), règles de composition, questions ouvertes
+- `simulations/modificateurs-taille.md` — comment chaque friction se déforme
+  en petite/moyenne/grande société (injecté au moteur)
+- `simulations/modificateurs-stade.md` — croissance/plateau/crise/transmission
+- `simulations/SIMULATIONS.md` — 520 simulations composées (générées par
+  scripts/generate-simulations.py; référence sur disque, non injectée)
 
 ## Vague 1 (2026-07-14) — sources distillées
 The Goal + Critical Chain (Goldratt), Toyota Production System (Ohno),
