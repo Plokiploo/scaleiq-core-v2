@@ -44,22 +44,47 @@ outcomes (validated / failed / unresolved) → trace decision_events.
    Toute décision structurante → nouvelle entrée dans docs/DECISIONS.md.
 7. Surface simple, structure profonde. Clarté d'investigation > design.
 
-## Mission immédiate (ordre strict)
-1. `npm install && npm run dev` — vérifier que l'app démarre.
-2. Dérouler la boucle COMPLÈTE via l'UI sur localhost:3000 :
-   org → engagement → diagnostic → interview + tours → findings des 4 types
-   (vérifier que evidence sans niveau est refusée) → analyse causale liée →
-   recommandation liée à l'évidence → outcome validé → transitions de statut
-   jusqu'à closed (vérifier qu'une transition invalide est refusée en 422).
-3. Corriger chaque défaut trouvé. Commits atomiques, messages clairs.
-4. Mettre à jour SCALEIQ-CURRENT-STATE.md (sections 5, 9) avec les résultats réels.
-5. Rapporter : ce qui marche, ce qui a été réparé, ce qui manque avant MVP-ready.
+## QA runtime: FAITE (2026-07-13, D-009)
+Boucle complète validée en conditions réelles, garde-fous vérifiés, zéro défaut
+applicatif. Feedback de Jonathan après premier usage réel: « plus seamless,
+dumbproof, et surtout plus automatique ». → Phase 5 AUTORISÉE.
 
-## Ensuite seulement (Phase 5-6, avec accord de Jonathan)
-- Phase 5 : assistance IA (suggestions de questions d'interview, aide à la
-  formulation d'hypothèses, brouillons de recommandations) — chaque sortie IA
-  entre par les routes existantes avec provenance `ai` + confidence.
-- Phase 6 : consolider la boucle validation/outcome (relances, statuts).
+## Mission immédiate: PHASE 5 — INVESTIGATION GUIDÉE PAR L'IA
+Objectif: l'utilisateur ne pilote plus la mécanique; l'IA mène l'investigation,
+l'utilisateur répond et valide. Interface en français, zéro jargon.
+
+Périmètre exact:
+1. Flux guidé unique depuis l'accueil: bouton « Nouveau diagnostic » →
+   l'utilisateur décrit son problème en langage naturel → l'IA crée
+   org/engagement/diagnostic avec des valeurs par défaut sensées (renommables),
+   sans jamais montrer d'UUID ni de vocabulaire technique.
+2. Interview menée par l'IA: écran de chat où l'IA pose UNE question à la fois
+   (style Gemba: factuel, orienté observation), chaque échange persisté via
+   /api/interviews/[id]/turns. 5 à 8 questions max avant synthèse.
+3. Après l'interview, l'IA propose: findings typés (observation/interprétation/
+   hypothèse — provenance 'ai' + confidence OBLIGATOIRE), une analyse causale
+   avec cause probable, et 1 à 3 recommandations simples (titre + action + owner
+   suggéré). L'utilisateur valide/modifie/rejette CHAQUE proposition avant
+   insertion — jamais d'écriture IA silencieuse.
+4. Tout passe par les routes API existantes. Aucun nouveau concept en schéma.
+5. Implémentation LLM: route serveur (ex: app/api/ai/route.ts) appelant l'API
+   Anthropic (modèle claude-sonnet-5, fallback configurable) avec ANTHROPIC_API_KEY
+   depuis .env.local (server-only, jamais exposée). Prompt système: investigateur
+   opérationnel Lean/TOC; sortie JSON structurée validée avant usage.
+6. L'ancienne vue détaillée reste accessible (« mode expert ») mais le flux
+   guidé devient le chemin par défaut.
+
+Definition of done:
+- Un utilisateur qui ne connaît rien à ScaleIQ peut aller de « j'ai un problème »
+  à « plan d'action validé » sans lire de documentation.
+- npm run build vert, parcours guidé testé en runtime, garde-fous intacts.
+- SCALEIQ-CURRENT-STATE.md et docs/DECISIONS.md mis à jour.
+
+Prérequis (à demander à Jonathan si absent): ANTHROPIC_API_KEY dans .env.local.
+
+## Ensuite (avec accord de Jonathan)
+- Phase 6: consolider la boucle validation/outcome (relances, suivi).
+- Auth + policies RLS avant toute exposition hors localhost.
 
 ## Escalade (STOP et demander à Jonathan/Ryokan)
 - Tout changement de mission ou de périmètre produit.
