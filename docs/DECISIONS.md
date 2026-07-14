@@ -349,3 +349,20 @@ de la matrice. Livré:
   Usage prévu: évaluation du moteur (retrouve-t-il la friction plantée?)
   avant la première compétition réelle.
 Autorité: Jonathan (volume, budget), Ryokan (architecture, garde-fous).
+
+## D-020 (2026-07-14) Test comparatif de génération: Fable 100 / Sonnet 1300 / Haiku 2000
+Décision Jonathan: panachage des trois modèles + comparaison, plafond relevé à
+35 CAD. Implémentation:
+- `lib/simgen.ts` + route `POST /api/simulations/generate` {tier, batch}:
+  génération par lots côté serveur (la clé ne quitte jamais la machine),
+  budget global persistant (_state.json), PLAFOND DUR 25 USD (~34,5 CAD),
+  reprise automatique (IDs déjà générés sautés).
+- Design de comparaison: les 100 PREMIÈRES coordonnées sont générées par les
+  TROIS modèles (comparaison appariée); au-delà, zones distinctes par modèle
+  pour maximiser la couverture (sonnet: coords 100+, haiku: coords 900+).
+- Estimation: fable 3,2$ + sonnet 8,2$ + haiku 6,3$ ≈ 18 USD (~25 CAD).
+- Pilotage: Ryokan déclenche les lots via le navigateur (session authentifiée);
+  les fichiers générés (generated/{tier}/*.jsonl) sont lus directement pour le
+  contrôle qualité et la comparaison finale (grille: réalisme/spécificité,
+  qualité de la fausse piste, honnêteté de l'invalidation, variété, coût/sim).
+Autorité: Jonathan (volume, budget, panachage), Ryokan (architecture, exécution).
