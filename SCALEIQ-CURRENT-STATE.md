@@ -59,7 +59,7 @@ Aucune. Framework de test à introduire en Phase 2/3.
 
 ## 10. Déploiement
 Aucun. Local-first (doctrine: bootstrap locally, expose later).
-Variables d'environnement: voir `.env.example`. Projet Supabase à créer.
+Variables d'environnement: voir `.env.example`. Projet Supabase: créé (ref ojuiaixjnsbhvwgkqzdp, ca-central-1), migrations 0001+0002 appliquées, RLS deny-by-default actif.
 
 ## 11. Risques critiques
 1. Re-dérive vers un dashboard générique ou un summarizer IA (anti-goals).

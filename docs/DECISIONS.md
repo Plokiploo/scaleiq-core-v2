@@ -20,3 +20,16 @@ Schéma 0001 limité aux concepts validés de la boucle diagnostique. Les findin
 portent un type épistémique (observation/interpretation/hypothesis/evidence),
 une provenance (user/ai) et un niveau d'évidence. Aucun concept Under Observation
 en schéma. Réversible: additif uniquement. Autorité: Ryokan (dans son ownership).
+
+## D-005 (2026-07-13) RLS deny-by-default dès la création
+RLS activé sur les 12 tables sans aucune policy: la clé publique ne donne accès
+à rien; toute lecture/écriture passe par les routes serveur (service role) pendant
+le MVP. Policies fines à définir avec l'authentification (Phase 2). Justification:
+advisor Supabase critique + loi "Security shortcuts become disasters".
+Réversible: ajout de policies. Autorité: Ryokan (Decision Type 14).
+
+## D-006 (2026-07-13) Projet Supabase
+Projet `scaleiq-core-v2` (ref ojuiaixjnsbhvwgkqzdp) créé dans l'org 2R Ventures,
+région ca-central-1, coût 0$/mois (free tier), Postgres 17. Migrations 0001+0002
+appliquées et vérifiées (12 tables, RLS actif partout). Types TypeScript générés
+depuis le schéma réel (lib/database.types.ts). Autorité: Jonathan (automatisation demandée).
