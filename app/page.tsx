@@ -10,6 +10,7 @@ export default function Home() {
   const [name, setName] = useState("");
   const [context, setContext] = useState("");
   const [error, setError] = useState("");
+  const [expert, setExpert] = useState(false);
 
   const load = () => api<Org[]>("/api/organizations").then(setOrgs).catch((e) => setError(e.message));
   useEffect(() => { load(); }, []);
@@ -25,8 +26,21 @@ export default function Home() {
 
   return (
     <main>
-      <h1>ScaleIQ</h1>
-      <p className="muted">Identifier les frictions, comprendre les causes probables, agir simplement.</p>
+      <div className="hero">
+        <h1>Identifie ce qui ralentit ton organisation.</h1>
+        <p>Décris ton problème, l&apos;IA t&apos;accompagne question par question jusqu&apos;au plan d&apos;action.</p>
+        <Link href="/nouveau"><button>Nouveau diagnostic</button></Link>
+      </div>
+
+      <p className="row" style={{ justifyContent: "center" }}>
+        <Link href="/suivi"><button className="secondary">Suivi →</button></Link>
+        <button className="secondary" onClick={() => setExpert((v) => !v)}>
+          {expert ? "Masquer le mode expert" : "Mode expert →"}
+        </button>
+      </p>
+
+      {expert && (
+      <>
       <h2>Organisations</h2>
       <form className="row" onSubmit={createOrg}>
         <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nom de l'organisation" required />
@@ -41,6 +55,8 @@ export default function Home() {
         </div>
       ))}
       {orgs.length === 0 && !error && <p className="muted">Aucune organisation. Crée la première.</p>}
+      </>
+      )}
     </main>
   );
 }

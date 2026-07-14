@@ -41,7 +41,7 @@ export default function DiagnosticPage() {
 
   return (
     <main>
-      <p><Link href="/">← Accueil</Link></p>
+      <p><Link href="/">← Accueil</Link> · <Link href={`/diagnostics/${id}/guide`}>Mode guidé (IA) →</Link></p>
       <h1>{d.title}</h1>
       <p>
         <span className="badge">{d.status}</span>
@@ -183,7 +183,7 @@ function AnalysesBlock({ analyses, findings, diagnosticId, act }: { analyses: An
           <option value="other">Autre</option>
         </select>
         <input value={cause} onChange={(e) => setCause(e.target.value)} placeholder="Cause probable" required />
-        <label><input type="checkbox" checked={dominant} onChange={(e) => setDominant(e.target.checked)} /> Friction dominante</label>
+        <label><input type="checkbox" checked={dominant} onChange={(e) => setDominant(e.target.checked)} /> <span className="hint" data-hint="La cause qui bloque le plus — celle à traiter en priorité s'il fallait n'en choisir qu'une.">Friction dominante</span></label>
         <button type="submit">Créer</button>
         <div style={{ width: "100%" }}>
           {findings.map((f) => (
@@ -230,10 +230,12 @@ function RecsBlock({ recs, findings, analyses, diagnosticId, act }: { recs: Rec[
         <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Titre" required />
         <input value={action} onChange={(e) => setAction(e.target.value)} placeholder="Action simple à exécuter" required />
         <input value={owner} onChange={(e) => setOwner(e.target.value)} placeholder="Owner" />
+        <span className="muted hint" data-hint="L'impact si cette action n'est pas faite — de faible à critique.">Sévérité</span>
         <select value={severity} onChange={(e) => setSeverity(e.target.value)}>
           <option value="low">Faible</option><option value="medium">Moyenne</option>
           <option value="high">Élevée</option><option value="critical">Critique</option>
         </select>
+        <span className="muted hint" data-hint="L'urgence relative par rapport aux autres actions — P0 est la plus urgente, P3 la moins urgente.">Priorité</span>
         <select value={priority} onChange={(e) => setPriority(e.target.value)}>
           <option value="p3">P3</option><option value="p2">P2</option>
           <option value="p1">P1</option><option value="p0">P0</option>

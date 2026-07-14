@@ -61,3 +61,180 @@ liée à l'évidence → outcome validé → clôture. Garde-fous vérifiés en 
 purgées. Aucun défaut applicatif. Incidents d'environnement (hors app): cache
 .next corrompu par sync pendant exécution → purge + redémarrage; ancien process
 zombie sur port 3000 → serveur sain sur 3001. Autorité: Ryokan.
+
+## D-010 (2026-07-14) Phase 5 — investigation guidée par l'IA
+Nouveau flux par défaut depuis l'accueil: bouton « Nouveau diagnostic » →
+description libre du problème → l'IA (route serveur `app/api/ai/route.ts`,
+Anthropic SDK, modèle `claude-sonnet-5` configurable via `ANTHROPIC_MODEL`,
+sorties contraintes par JSON Schema via `output_config.format`) propose des
+valeurs par défaut renommables pour organisation/engagement/diagnostic, sans
+jamais afficher d'UUID ni de vocabulaire technique. Interview menée par l'IA en
+chat (style Gemba, une question factuelle à la fois, 5 à 8 questions), chaque
+tour persisté via les routes `interviews/[id]/turns` existantes (aucun nouveau
+concept en schéma: les tours "interviewer"/"interviewee" portent déjà cette
+distinction). Après l'interview, l'IA propose findings typés (provenance `ai` +
+confiance obligatoire, evidence_level obligatoire si kind=evidence), une
+analyse causale (5 pourquoi ou contrainte, cause probable, marquage dominante),
+et 1 à 3 recommandations (action simple, owner suggéré, sévérité, priorité).
+Chaque proposition est affichée éditable avec case à cocher: rien n'est écrit
+en base avant validation explicite de l'utilisateur (loi #4 respectée).
+L'ancienne vue détaillée reste accessible en « mode expert » (bouton sur
+l'accueil, lien croisé depuis la vue diagnostic). Le flux guidé pilote les
+transitions de statut forward-only existantes (draft→investigating au début de
+l'entretien, investigating→analyzed puis analyzed→recommended après validation
+des propositions correspondantes) via les mêmes routes PATCH que le mode
+expert. Testé en runtime réel (Chrome piloté par Playwright + appels API directs
+contre l'API Anthropic et Supabase réels): parcours complet accueil → entretien
+IA (6 questions Gemba cohérentes) → synthèse (findings/cause/recommandations) →
+validation → écritures confirmées en base → transitions de statut confirmées.
+Aucune erreur console JS. L'IA a correctement refusé d'inventer une cause
+probable quand les réponses de test étaient trop vagues (fidélité au
+transcript vérifiée empiriquement). Données de test purgées après QA.
+Autorité: Ryokan.
+
+## D-011 (2026-07-14) Extension de périmètre Phase 5: partage d'écran + vision IA
+Constat: pendant l'entretien, la personne interviewée veut souvent montrer un
+cas concret (un écran, un outil, un blocage) plutôt que le décrire seulement
+à l'oral/écrit. Jonathan juge cette évolution nécessaire, pas accessoire, et
+autorise l'extension de périmètre directement (carte blanche d'implémentation,
+sauf dépense significative — à valider avant engagement).
+
+Décision: ajout d'un troisième mode de réponse « Montrer mon écran » dans
+l'entretien guidé (`app/diagnostics/[id]/guide/page.tsx`), à côté des modes
+clavier et vidéo existants (D-010). Mécanique:
+- Capture du flux via `getDisplayMedia` (image uniquement, pas d'audio système).
+- Une image du flux est capturée et envoyée à l'IA (nouveau mode `observe_screen`,
+  `lib/ai.ts` / `app/api/ai/route.ts`, vision + sortie JSON structurée comme les
+  autres modes) à intervalle de 6s, plafonné à 6 images par session de partage
+  (maîtrise du coût — pas d'appel API sans plafond). Chaque image est
+  redimensionnée et compressée côté client avant envoi (jamais stockée).
+- L'IA retourne une observation factuelle courte, affichée en direct à
+  l'utilisateur ("ce que l'IA remarque à l'écran"), avec un indicateur de
+  pertinence pour ignorer le bruit (ex. écran de bureau vide).
+- À la fin du partage, les observations retenues (+ un commentaire textuel
+  optionnel de l'utilisateur) sont compilées en UN SEUL tour "interviewee"
+  via la route existante `/api/interviews/[id]/turns` — aucun nouveau concept
+  de schéma, aucune image ni vidéo persistée, seul le texte compilé l'est.
+  Ce tour entre ensuite dans la boucle adaptative existante (prochaine
+  question, puis synthèse) exactement comme une réponse tapée ou parlée.
+Conformité aux lois du projet: loi #1 (route serveur, clé jamais exposée),
+loi #4 (sortie IA = proposition affichée, rien d'écrit silencieusement en
+base — les observations ne sont que du texte de transcript, pas des findings),
+loi #6 (aucune colonne/concept de schéma ajouté).
+Autorité: Jonathan.
+
+## D-012 (2026-07-14) Phase 6 — vue de suivi manuelle des outcomes
+Périmètre confirmé par Jonathan: "vue de suivi manuelle" — lister les
+recommandations sans outcome résolu pour que l'utilisateur y revienne
+lui-même enregistrer le résultat. Explicitement écarté: rappels automatiques
+(email/notification), qui auraient exigé une nouvelle infrastructure d'envoi
+et une tâche planifiée — non retenu pour l'instant.
+
+Décision: nouvelle route `GET /api/recommendations?needs_outcome=true`
+(`app/api/recommendations/route.ts`) qui retourne les recommandations dont
+aucun outcome n'existe, ou dont le dernier outcome a le statut `pending` ou
+`unresolved` (les statuts `validated`/`failed` sont considérés résolus).
+Nouvelle page `/suivi` (`app/suivi/page.tsx`), accessible depuis l'accueil,
+listant ces recommandations avec leur contexte (organisation → engagement →
+diagnostic) et un formulaire d'enregistrement d'outcome direct, réutilisant
+la route existante `/api/recommendations/[id]/outcomes` — aucune écriture
+nouvelle, aucun nouveau concept de schéma, juste une lecture agrégée
+cross-diagnostic.
+
+Distinction avec la loi #5 (dashboard analytics générique interdit): cette
+vue n'est pas un tableau de bord de métriques/graphiques — c'est une liste
+d'actions concrètes à revoir, explicitement prévue dans le milestone MVP
+("dashboard de revue" — SCALEIQ-CURRENT-STATE.md §7). Aucune agrégation
+statistique, aucun graphique.
+
+Testé en runtime: recommandation sans outcome apparaît dans `/suivi`,
+disparaît après enregistrement d'un outcome `validated` (vérifié via API et
+via navigateur piloté, zéro erreur console). Données de test purgées.
+Autorité: Jonathan.
+
+## D-013 (2026-07-14) Phase 2 — authentification par lien magique + policies RLS
+Décision confirmée par Jonathan: lien magique (passwordless, Supabase Auth),
+un seul compte autorisé pour l'instant (le sien), pas d'inscription libre,
+pas de rappels/notifications à construire pour cette phase.
+
+Décision technique:
+- `middleware.ts` (racine) + `lib/supabase-middleware.ts`: toute requête sans
+  session valide est bloquée — redirection vers `/login` pour les pages,
+  réponse `401 {"error":"authentification requise"}` en JSON pour `/api/*`
+  (évite qu'un `fetch()` client reçoive du HTML de redirection à la place du
+  JSON attendu). Seul `/login` reste public.
+- Le même middleware intercepte et échange le `?code=` du lien magique quel
+  que soit le chemin d'atterrissage (plutôt qu'une route `/auth/callback`
+  dédiée) — la configuration "Redirect URLs" du projet Supabase renvoie vers
+  l'URL racine par défaut; router l'échange dans le middleware évite une
+  dépendance à cette configuration externe.
+- `lib/supabase-server.ts` (Server Components/Route Handlers) et
+  `lib/supabase-client.ts` (composants client) : clients liés à la session
+  (clé anon + cookies), respectent RLS — distincts de `supabaseService()`
+  dans `lib/supabase.ts` qui reste service-role et contourne RLS pour toutes
+  les routes `app/api` existantes (loi #1 inchangée).
+- `app/login/page.tsx`: un champ email, `signInWithOtp({ shouldCreateUser:
+  false, ... })` — empêche toute création de compte par un email non déjà
+  enregistré (vérifié: email inconnu → 422, aucun compte créé; email
+  autorisé → fonctionne).
+- Compte de Jonathan créé directement via l'API Admin Supabase
+  (`jladjyn.jrr@gmail.com`, confirmé sans passer par un flux d'inscription).
+- Migration `0003_auth_rls_policies.sql`: policy `authenticated_full_access`
+  (`for all using (true) with check (true)`) sur les 12 tables — modèle un
+  seul espace de travail partagé (pas de colonne owner/tenant: le
+  multi-tenant est explicitement interdit, loi #5). `anon` reste sans accès
+  (deny-by-default, migration 0002 inchangée). Ces policies sont une défense
+  en profondeur: les routes serveur utilisent déjà le service role et ne les
+  consultent jamais; elles ne protégeraient qu'un futur usage direct de la
+  clé anon côté client (actuellement inexistant — vérifié, aucun appel
+  Supabase direct côté client dans le code).
+- Avertissements `rls_policy_always_true` du linter Supabase: attendus et
+  documentés (conséquence directe du modèle mono-espace de travail voulu,
+  pas un oubli). Avertissement `auth_leaked_password_protection`: non
+  applicable, aucun mot de passe utilisé (lien magique uniquement).
+
+Testé: accès non authentifié bloqué (page → redirection `/login`, API →
+401 JSON) — vérifié en runtime. Mécanisme OTP vérifié directement contre
+l'API Auth Supabase pour le compte de Jonathan (jeton valide obtenu).
+Tentative de connexion avec un email non autorisé: rejetée (422), aucun
+compte créé (vérifié en base: 1 seul utilisateur après test). Clic réel sur
+le lien reçu par email confirmé par Jonathan (2026-07-14): connexion
+fonctionnelle de bout en bout. Phase 2 sécurité close.
+Autorité: Jonathan.
+
+## D-014 (2026-07-14) Pivot design: refonte visuelle « aussi pro et accueillant qu'Apple »
+Constat: la loi #7 (« Surface simple, structure profonde. Clarté d'investigation
+> design décoratif. ») et D-008 (« Aucune lib UI: CSS minimal ») visaient un
+MVP fonctionnel, pas un produit fini. Jonathan demande maintenant un design
+visuel abouti, chaleureux et professionnel, qui accompagne l'utilisateur et
+répond à ses questions sans qu'il quitte l'écran. Ceci amende la loi #7 sur
+le volet visuel — la clarté d'investigation reste non négociable, mais elle
+n'exclut plus un travail de direction artistique explicite.
+
+Décision technique (aucune nouvelle lib UI — toujours du CSS pur, `app/globals.css`):
+- Système de tokens CSS (`:root` + `@media (prefers-color-scheme: dark)`):
+  typographie façon système Apple (-apple-system/SF Pro), palette neutre
+  (fond quasi blanc `#fbfbfd` / quasi noir `#1d1d1f`, accent bleu `#0071e3`
+  clair / `#2997ff` sombre), rayons généreux, ombres douces, transitions.
+  Mode sombre automatique via `prefers-color-scheme` — pas de bouton toggle
+  (scope minimal). `color-scheme: light dark` sur `:root` pour éviter que le
+  navigateur applique son propre style natif en conflit sur les champs/boutons
+  (bug de contraste trouvé et corrigé en test).
+- Boutons en pilule (`border-radius: 980px`, esthétique Apple), cartes avec
+  ombre légère et hover, bandeau de navigation collant avec effet de flou
+  (`backdrop-filter`).
+- Nouveau composant CSS `.hint` (info-bulle au survol/focus, `data-hint="..."`)
+  appliqué sur le jargon (type de finding, niveau de fiabilité, sévérité,
+  priorité, friction dominante) dans l'entretien guidé et le mode expert —
+  répond à la question sur place, sans quitter l'écran ni consulter une doc.
+- Accueil et connexion restructurés autour d'un bloc hero/carte centré, plus
+  engageants. Aucun changement de logique métier, aucune nouvelle route,
+  aucun nouveau concept de schéma — uniquement CSS + réarrangement JSX des
+  pages existantes.
+
+Testé: build/typecheck verts. Captures d'écran (navigateur piloté, session
+authentifiée réelle) en clair et en sombre pour accueil, nouveau diagnostic,
+connexion, et suivi (avec carte de recommandation réelle) — bug de contraste
+du bouton de déconnexion en mode sombre trouvé et corrigé. Données de test
+purgées.
+Autorité: Jonathan.

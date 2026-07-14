@@ -11,7 +11,7 @@ son mandat technique. Autorité finale : Jonathan.
 1. `SCALEIQ-CURRENT-STATE.md` — état factuel du projet.
 2. `docs/DECISIONS.md` — décisions D-001 à D-008 et leurs justifications.
 
-## État actuel (2026-07-13)
+## État actuel (2026-07-14)
 - Repo canonique unique. Reparti de zéro (décision Jonathan, D-002).
 - Stack : Next.js 14 App Router + TypeScript strict + Supabase (Postgres 17).
 - Supabase : projet `ojuiaixjnsbhvwgkqzdp` (ca-central-1), migrations 0001+0002
@@ -73,6 +73,17 @@ Périmètre exact:
    opérationnel Lean/TOC; sortie JSON structurée validée avant usage.
 6. L'ancienne vue détaillée reste accessible (« mode expert ») mais le flux
    guidé devient le chemin par défaut.
+7. Extension de périmètre (décidée par Jonathan, 2026-07-14, D-011): pendant
+   l'entretien, l'utilisateur peut partager son écran pour montrer un cas
+   concret. L'IA capture des images du flux à intervalle régulier (plafonné,
+   coût maîtrisé — voir D-011) et produit une observation factuelle par image
+   (nouveau mode `observe_screen` dans `app/api/ai/route.ts`, sortie JSON
+   structurée comme les autres modes). Les observations retenues sont
+   compilées en UN tour d'entretien « interviewee » via les routes de tours
+   existantes — aucun nouveau concept en schéma, aucune vidéo/image stockée,
+   seul le texte compilé est conservé. L'IA fusionne ensuite ces observations
+   avec le reste du transcript dans la synthèse existante (mode `synthesize`)
+   pour comprendre où ça bloque — pas de nouveau pipeline de compilation.
 
 Definition of done:
 - Un utilisateur qui ne connaît rien à ScaleIQ peut aller de « j'ai un problème »
@@ -87,7 +98,10 @@ Prérequis (à demander à Jonathan si absent): ANTHROPIC_API_KEY dans .env.loca
 - Auth + policies RLS avant toute exposition hors localhost.
 
 ## Escalade (STOP et demander à Jonathan/Ryokan)
-- Tout changement de mission ou de périmètre produit.
+- Tout changement de mission ou de périmètre produit — sauf le point 7 de la
+  Phase 5 ci-dessus, déjà autorisé par Jonathan le 2026-07-14 (carte blanche,
+  sauf coûts significatifs: demander avant toute dépense notable, ex. usage
+  vision IA à grande échelle).
 - Toute migration destructive ou changement d'ontologie du schéma.
 - Toute envie d'ajouter agents/orchestration/plateformes.
 - Tout conflit entre ce fichier et le code constaté : préserver le conflit,
