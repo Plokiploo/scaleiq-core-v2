@@ -29,8 +29,15 @@ inchangés. Les « acquis supposés » de la directive sont reclassés en object
   zéro coût d'apprentissage. Décision réversible tant que le domaine reste en SQL standard.
 
 ## 5. Ce qui fonctionne / ne fonctionne pas
-- Fonctionne: rien (projet neuf). Ce document et le squelette sont le premier état.
-- Manquant: tout le produit (voir §7).
+- QA runtime complète le 2026-07-13 (UI réelle sur localhost, base Supabase réelle):
+  boucle entière validée — org → engagement → diagnostic → interview + tours →
+  findings 4 types → analyse causale dominante liée (2 findings) → recommandation
+  high/p1 liée à l'évidence → outcome validated → transitions jusqu'à closed.
+- Garde-fous vérifiés en rejet: evidence sans niveau (400), finding IA sans
+  confiance (400), transition invalide closed→investigating (422).
+- 15 événements decision_events générés sur le parcours. Données de test nettoyées.
+- Manquant: authentification + policies RLS (Phase 2 sécurité), assistance IA
+  (Phase 5), consolidation boucle outcome (Phase 6), déploiement.
 
 ## 6. Modèle de données
 - Défini dans `supabase/migrations/0001_initial_domain.sql`.
@@ -55,7 +62,9 @@ API serveur de la boucle construite (Phase 3). UX (Phase 4) à venir. Ordre rest
 4 (UX minimale) → 5 (support IA avec provenance) → 6 (boucle outcome).
 
 ## 9. Couverture de tests
-Aucune. Framework de test à introduire en Phase 2/3.
+Pas de tests automatisés encore (à introduire). QA manuelle/pilotée complète
+exécutée le 2026-07-13: parcours UI bout-en-bout + tests négatifs API + 
+vérification SQL des écritures. Résultat: 100% conforme, zéro défaut applicatif.
 
 ## 10. Déploiement
 Aucun. Local-first (doctrine: bootstrap locally, expose later).

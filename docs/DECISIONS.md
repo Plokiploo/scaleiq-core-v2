@@ -52,3 +52,12 @@ actuelle/cible/écart, interviews et tours persistés, findings avec badge
 avec marquage friction dominante, recommandations liées à l'évidence, outcomes.
 Aucune lib UI: CSS minimal, clarté d'investigation > design décoratif (directive
 Phase 4). Autorité: Ryokan.
+
+## D-009 (2026-07-13) QA runtime bout-en-bout: conforme
+Boucle complète exécutée via l'UI réelle (Chrome piloté) contre la base réelle:
+création → investigation → findings typés → analyse dominante → recommandation
+liée à l'évidence → outcome validé → clôture. Garde-fous vérifiés en rejet
+(400/400/422). Écritures confirmées en SQL (15 decision_events). Données de test
+purgées. Aucun défaut applicatif. Incidents d'environnement (hors app): cache
+.next corrompu par sync pendant exécution → purge + redémarrage; ancien process
+zombie sur port 3000 → serveur sain sur 3001. Autorité: Ryokan.
