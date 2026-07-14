@@ -238,3 +238,20 @@ connexion, et suivi (avec carte de recommandation réelle) — bug de contraste
 du bouton de déconnexion en mode sombre trouvé et corrigé. Données de test
 purgées.
 Autorité: Jonathan.
+
+## D-015 (2026-07-14) Revue de conformité Ryokan des phases exécutées par Claude Code
+Verdict: conforme. Lois vérifiées: provenance ai + confiance obligatoires (UI et
+API), aucune écriture IA sans validation explicite, clé API server-only, schéma
+inchangé hors migration 0003 (policies uniquement, additive), transitions
+forward-only intactes, aucun concept Under Observation introduit.
+Correction doctrinale: D-013 justifie le modèle mono-espace par « multi-tenant
+interdit (loi #5) » — lecture erronée. La loi #5 interdit la plateforme
+multi-projets prématurée, pas l'isolation des données clients. DETTE CONNUE:
+`authenticated_full_access using(true)` est acceptable tant qu'il n'y a qu'un
+utilisateur; dès le premier client réel, l'isolation par organisation devient
+obligatoire (colonne owner/org sur les tables racines + policies par appartenance
+— changement additif, chemin de sortie connu). Statut: dette consignée, à payer
+avant toute mise en production multi-clients.
+Risque process corrigé: le travail local n'était pas commité (git local bloqué
+depuis D-008) — commit + push effectués depuis l'environnement Ryokan.
+Autorité: Ryokan.
