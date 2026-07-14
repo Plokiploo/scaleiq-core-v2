@@ -24,7 +24,12 @@ ce distillat, versionné dans le repo.
 - `patterns/questions.md` — playbook de questions Gemba par situation
 - `patterns/actions.md` — gabarits d'actions simples
 - `patterns/lois.md` — lois quantitatives des flux (Factory Physics)
-- `cases/seed-cases.md` — banque de scénarios déduits (expérience synthétique)
+- `cases/seed-cases.md` — 12 cas fondateurs détaillés (injectés au moteur)
+- `cases/{ops-service, industrie-logistique, ventes-marketing,
+  management-organisation, finance-cash, produit-digital, terrain-branches}.md
+  — banque étendue (104 cas au total, format compact)
+- `cases/INDEX.md` — index une-ligne-par-cas (injecté au moteur pour repérer
+  les analogies; le fichier source contient le cas complet)
 
 ## Vague 1 (2026-07-14) — sources distillées
 The Goal + Critical Chain (Goldratt), Toyota Production System (Ohno),

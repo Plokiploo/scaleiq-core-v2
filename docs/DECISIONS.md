@@ -283,3 +283,26 @@ Implémentation minimale (pas de RAG, pas de base vectorielle — non mérités)
 Ownership: l'acquisition/extraction de livres reste le territoire de Booky;
 ScaleIQ ne consomme que le distillat.
 Autorité: Jonathan (périmètre), Ryokan (architecture).
+
+## D-017 (2026-07-14) Banque de cas étendue: 104 scénarios multi-domaines
+Demande Jonathan: minimum 100 cas, toute la bibliothèque mobilisée, possibilité
+de demander de nouveaux livres. Livré: 104 cas (12 fondateurs détaillés + 92
+compacts) répartis en 7 domaines: ops service/back-office, industrie/logistique/
+supply (dont DDMRP), ventes/marketing/acquisition, management/organisation/
+direction, finance/cash/rentabilité, produit/digital/UX/tech, commerce/terrain/
+branches locales. Sources élargies au-delà du canon Lean/TOC: Hormozi, StoryBrand,
+Moore, Dunford, Blount, Jordan (sales code), Grove, Wiseman, Rumelt, Collins,
+Doerr, Heath, Cialdini, Voss, Ariely, Taleb, DDMRP, Croll (Lean Analytics),
+Cagan, Krug, Kim (Lean Enterprise), Berman (Financial Intelligence), Michalowicz.
+Architecture d'injection (taille bornée): le moteur reçoit patterns + actions +
+12 cas fondateurs complets + INDEX une-ligne des 104 (repérage d'analogies);
+les cas complets restent sur disque. Le RAG ne sera construit que si l'index
+prouve son insuffisance (chemin d'évolution documenté D-016).
+Chaque cas porte fausse piste typique + condition d'invalidation. Statut
+uniforme: candidate. Règle Jonathan encodée: l'expérience n'est pas une valeur
+absolue, chaque cas réel affine la banque (méta-règles seed-cases.md).
+Livres à acquérir (vague 2): Out of the Crisis (Deming), The Machine That
+Changed the World (Womack), It's Not Luck (Goldratt — thinking processes),
+The Checklist Manifesto (Gawande), Thinking Fast and Slow (Kahneman),
+The E-Myth Revisited (Gerber — franchise/PME terrain).
+Autorité: Jonathan (volume/périmètre), Ryokan (architecture).

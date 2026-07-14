@@ -28,7 +28,7 @@ function corpus(): { patterns: string; cases: string } {
   _corpus = {
     patterns: ["patterns/frictions.md", "patterns/questions.md", "patterns/lois.md"]
       .map(read).filter(Boolean).join("\n\n"),
-    cases: ["patterns/actions.md", "cases/seed-cases.md"].map(read).filter(Boolean).join("\n\n"),
+    cases: ["patterns/actions.md", "cases/seed-cases.md", "cases/INDEX.md"].map(read).filter(Boolean).join("\n\n"),
   };
   return _corpus;
 }
