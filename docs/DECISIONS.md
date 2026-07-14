@@ -255,3 +255,31 @@ avant toute mise en production multi-clients.
 Risque process corrigé: le travail local n'était pas commité (git local bloqué
 depuis D-008) — commit + push effectués depuis l'environnement Ryokan.
 Autorité: Ryokan.
+
+## D-016 (2026-07-14) Corpus de connaissance: distillation de livres + banque de cas
+Décision Jonathan: usage A (améliorer le raisonnement en direct) + usage B
+(déduction de cas comme expérience synthétique), avec la règle explicite:
+« l'expérience n'est pas une valeur absolue — chaque nouveau cas affine la
+manière de fonctionner ».
+Implémentation minimale (pas de RAG, pas de base vectorielle — non mérités):
+- `knowledge/` versionné dans le repo: README doctrine (statuts candidate/
+  observed/validated, taille bornée, source citée), patterns/ (frictions,
+  questions Gemba, actions, lois Factory Physics), cases/seed-cases.md
+  (12 scénarios multi-secteurs déduits, chacun avec fausse piste typique,
+  signal de validation et CONDITION D'INVALIDATION).
+- Vague 1 distillée de: The Goal, Critical Chain, TPS (Ohno), Gemba Kaizen,
+  Toyota Kata, Managing to Learn, Learning to See, Lean Thinking, Factory
+  Physics, Thinking in Systems, Bulletproof Problem Solving, Phoenix Project
+  — tous présents dans la bibliothèque ECOSYSTEME de Jonathan (vérifié).
+  Vague 2 à acquérir: Out of the Crisis (Deming), The Machine That Changed
+  the World (Womack).
+- Câblage `lib/ai.ts`: corpus chargé du disque (cache process, fallback
+  silencieux si absent), injecté dans les prompts interview (patterns) et
+  synthèse (patterns + actions + cas), avec règles d'usage strictes dans le
+  prompt: priors pas conclusions, le cas réel prime, jamais cité à l'utilisateur.
+  Bootstrap et observe_screen restent sans corpus (inutile, coût).
+- Chemin d'évolution si le corpus dépasse la taille de prompt: compression
+  d'abord, RAG seulement si mérité par la récurrence.
+Ownership: l'acquisition/extraction de livres reste le territoire de Booky;
+ScaleIQ ne consomme que le distillat.
+Autorité: Jonathan (périmètre), Ryokan (architecture).

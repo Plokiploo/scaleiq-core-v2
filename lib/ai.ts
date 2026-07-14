@@ -1,4 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { readFileSync } from "fs";
+import { join } from "path";
 
 // Modèle configurable (mandat: claude-sonnet-5, fallback possible via env).
 const MODEL = process.env.ANTHROPIC_MODEL || "claude-sonnet-5";
@@ -8,6 +10,34 @@ function client(): Anthropic {
   if (!apiKey) throw new Error("ANTHROPIC_API_KEY manquante côté serveur");
   return new Anthropic({ apiKey });
 }
+
+
+// ---------- Corpus de connaissance (knowledge/, D-016) ----------
+// Distillat de livres versionné dans le repo. Doctrine: patterns = priors à
+// tester par les questions, jamais des conclusions. Chargé une fois par process.
+let _corpus: { patterns: string; cases: string } | null = null;
+function corpus(): { patterns: string; cases: string } {
+  if (_corpus) return _corpus;
+  const read = (rel: string): string => {
+    try {
+      return readFileSync(join(process.cwd(), "knowledge", rel), "utf-8");
+    } catch {
+      return ""; // corpus absent = le moteur fonctionne sans priors
+    }
+  };
+  _corpus = {
+    patterns: ["patterns/frictions.md", "patterns/questions.md", "patterns/lois.md"]
+      .map(read).filter(Boolean).join("\n\n"),
+    cases: ["patterns/actions.md", "cases/seed-cases.md"].map(read).filter(Boolean).join("\n\n"),
+  };
+  return _corpus;
+}
+
+const CORPUS_RULES = `Tu disposes ci-dessous d'un corpus de patterns diagnostiques distillés de la littérature (Lean, TOC, Factory Physics). Règles d'usage strictes:
+- Les patterns et cas sont des PRIORS, pas des conclusions. L'expérience n'est pas une valeur absolue: le cas réel prime toujours sur le pattern.
+- Utilise le corpus pour formuler de meilleures hypothèses et questions discriminantes, jamais pour plaquer un diagnostic tout fait.
+- Si le cas réel contredit un pattern, suis le cas réel.
+- Ne cite jamais le corpus, les livres ou les numéros de pattern à l'utilisateur.`;
 
 const SYSTEM_PROMPT = `Tu es un investigateur opérationnel senior, formé Lean / Théorie des Contraintes (TOC), façon Gemba walk.
 Ta mission: aider un utilisateur non technique à comprendre ce qui ralentit son organisation, pourquoi, et quelle action simple prendre ensuite.
@@ -119,6 +149,16 @@ function formatTranscript(transcript: Turn[]): string {
     .join("\n");
 }
 
+function systemWithCorpus(kind: "questions" | "synthese"): string {
+  const c = corpus();
+  const block =
+    kind === "questions"
+      ? c.patterns
+      : c.patterns + "\n\n" + c.cases;
+  if (!block.trim()) return SYSTEM_PROMPT;
+  return `${SYSTEM_PROMPT}\n\n${CORPUS_RULES}\n\n<corpus>\n${block}\n</corpus>`;
+}
+
 export async function aiNextQuestion(
   diagnostic: DiagnosticContext,
   transcript: Turn[]
@@ -129,7 +169,7 @@ export async function aiNextQuestion(
     max_tokens: 512,
     thinking: { type: "disabled" },
     output_config: { format: { type: "json_schema", schema: QUESTION_SCHEMA }, effort: "low" },
-    system: SYSTEM_PROMPT,
+    system: systemWithCorpus("questions"),
     messages: [
       {
         role: "user",
@@ -257,7 +297,7 @@ export async function aiSynthesize(
     model: MODEL,
     max_tokens: 4096,
     output_config: { format: { type: "json_schema", schema: SYNTHESIS_SCHEMA }, effort: "high" },
-    system: SYSTEM_PROMPT,
+    system: systemWithCorpus("synthese"),
     messages: [
       {
         role: "user",
