@@ -9,12 +9,13 @@ const GEN = join(ROOT, "knowledge", "simulations", "generated");
 const STATE = join(GEN, "_state.json");
 
 export const TIERS = {
-  fable: { model: "claude-fable-5", priceIn: 10, priceOut: 50, quota: 100 },
-  sonnet: { model: "claude-sonnet-5", priceIn: 2, priceOut: 10, quota: 1300 },
-  haiku: { model: "claude-haiku-4-5-20251001", priceIn: 1, priceOut: 5, quota: 2000 },
+  fable: { model: "claude-fable-5", priceIn: 10, priceOut: 50, quota: 100, thinking: 0 },
+  "fable-think": { model: "claude-fable-5", priceIn: 10, priceOut: 50, quota: 12, thinking: 12000 },
+  sonnet: { model: "claude-sonnet-5", priceIn: 2, priceOut: 10, quota: 1300, thinking: 0 },
+  haiku: { model: "claude-haiku-4-5-20251001", priceIn: 1, priceOut: 5, quota: 2000, thinking: 0 },
 } as const;
 export type Tier = keyof typeof TIERS;
-export const MAX_COST_USD = 25; // ~34.5 CAD — plafond Jonathan 35 CAD (D-020)
+export const MAX_COST_USD = 34; // D-022: +7 CAD haiku + +5 CAD fable-think autorisés par Jonathan
 const COMPARISON_SET = 100; // les N premières coordonnées sont générées par TOUS les tiers
 
 type Coord = { id: string; label: string; mod: string; kernel: string };
@@ -71,7 +72,7 @@ function plan(tier: Tier): { coordIdx: number; seed: number; id: string }[] {
   for (let i = 0; i < COMPARISON_SET && items.length < quota; i++)
     items.push({ coordIdx: i, seed: 1, id: `${_coords![i].id}-v1` });
   // 2) au-delà: zones distinctes par tier pour maximiser la couverture
-  const offset = tier === "sonnet" ? COMPARISON_SET : tier === "haiku" ? 800 : 0;
+  const offset = tier === "sonnet" ? COMPARISON_SET : tier === "haiku" ? 800 : 0; // fable-think: quota<=100 → reste dans le set de comparaison
   let i = COMPARISON_SET + offset, seed = 1;
   while (items.length < quota) {
     if (i >= _coords!.length) { i = COMPARISON_SET; seed++; }
@@ -107,7 +108,10 @@ export async function generateBatch(tier: Tier, batchSize: number) {
       const secteur = SECTEURS[(coord.id.length * 7 + item.seed * 13) % SECTEURS.length];
       try {
         const msg = await client.messages.create({
-          model: cfg.model, max_tokens: 1200, system: SYSTEM,
+          model: cfg.model,
+          max_tokens: cfg.thinking ? cfg.thinking + 1500 : 1200,
+          ...(cfg.thinking ? { thinking: { type: "enabled" as const, budget_tokens: cfg.thinking } } : {}),
+          system: SYSTEM,
           messages: [{ role: "user", content:
 `Coordonnée: ${coord.id} (${coord.label})
 Noyau: ${kernel.title} [${kernel.dom}, friction ${kernel.fcode}] — symptôme type: «${kernel.sym}» — action type: ${kernel.act}

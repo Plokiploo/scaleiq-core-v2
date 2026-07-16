@@ -11,6 +11,7 @@ const tier = process.argv[2] as Tier;
 if (!tier || !(tier in TIERS)) { console.error("usage: npx tsx scripts/run-generation.ts <fable|sonnet|haiku> [total]"); process.exit(1); }
 const total = parseInt(process.argv[3] ?? String(TIERS[tier].quota), 10);
 
+async function main() {
 let doneThisRun = 0, consecutiveZero = 0;
 for (;;) {
   const r = await generateBatch(tier, 20);
@@ -21,3 +22,5 @@ for (;;) {
   consecutiveZero = r.generated === 0 ? consecutiveZero + 1 : 0;
   if (consecutiveZero >= 2) { console.log("⚠ échecs répétés — voir knowledge/simulations/generated/_errors.log"); break; }
 }
+}
+main();
