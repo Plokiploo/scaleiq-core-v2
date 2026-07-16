@@ -93,7 +93,25 @@ Definition of done:
 
 Prérequis (à demander à Jonathan si absent): ANTHROPIC_API_KEY dans .env.local.
 
-## Mission courante: GÉNÉRATION DES 5000 SIMULATIONS (D-019)
+## Mission courante: GÉNÉRATION COMPARATIVE (D-020 — remplace D-019 ci-dessous)
+Jonathan a décidé: 100 simulations avec Fable 5, 1300 avec Sonnet 5, 2000 avec
+Haiku 4.5, puis comparaison. Budget: plafond DUR 25 USD (~34,5 CAD) codé dans
+lib/simgen.ts (déjà ~0,21$ consommé). Les 100 premières coordonnées sont
+générées par les TROIS modèles (comparaison appariée).
+État: route /api/simulations/generate + lib/simgen.ts opérationnels (fix
+parsing + journal d'erreurs commités). Les 5 premiers essais Fable ont échoué
+en parsing AVANT le fix max_tokens 1200 — vérifier _errors.log au premier lot.
+Ordre d'exécution:
+1. `npm i -D tsx` si absent, puis `npx tsx scripts/run-generation.ts fable 10`
+   — vérifier _errors.log et la qualité de 3 sorties
+   (knowledge/simulations/generated/fable/*.jsonl).
+2. Si sain: `npx tsx scripts/run-generation.ts fable` (jusqu'à 100),
+   puis `... sonnet` (1300), puis `... haiku` (2000). Résumable à tout moment.
+3. Rapport: nombre/coût/échecs par tier + 3 exemples par tier.
+4. NE PAS faire l'analyse comparative qualitative — rôle de Ryokan (Cowork),
+   qui lira les .jsonl. Commiter les .jsonl + _state.json + _errors.log.
+
+## Ancienne mission (remplacée par D-020): GÉNÉRATION DES 5000 SIMULATIONS (D-019)
 1. Vérifier: `node scripts/generate-simulations-llm.mjs --target 50` (essai, ~0.20$).
    Contrôler la qualité de 5 sorties dans knowledge/simulations/generated/*.jsonl
    (réalisme, fausse piste tentante, invalidation honnête, variété).
