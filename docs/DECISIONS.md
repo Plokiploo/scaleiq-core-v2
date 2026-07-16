@@ -366,3 +366,24 @@ Décision Jonathan: panachage des trois modèles + comparaison, plafond relevé 
   contrôle qualité et la comparaison finale (grille: réalisme/spécificité,
   qualité de la fausse piste, honnêteté de l'invalidation, variété, coût/sim).
 Autorité: Jonathan (volume, budget, panachage), Ryokan (architecture, exécution).
+
+## D-021 (2026-07-16) Verdict comparatif Fable 5 / Sonnet 5 / Haiku 4.5 (100 coordonnées appariées)
+Données: fable 100 sims (24 échecs parse, 19,4%), sonnet 1300 (5,1% échec),
+haiku 1389/2000 (3,1% échec — arrêté par le plafond budget à 25,02 USD).
+Grille (réalisme/spécificité, fausse piste, invalidation, variété, fiabilité):
+- FABLE: la meilleure profondeur causale — mécanismes non évidents cohérents
+  avec le stade (ex: gel des achats en crise qui affame l'emballage en
+  consommables), fausses pistes les plus tentantes. MAIS 19% de déchet parse
+  (facturé), prix 5-7× — inadapté au volume. Usage recommandé: gold set de
+  référence (les 100 servent d'étalon qualité) et, plus tard, juge d'évaluation.
+- SONNET: fiable, propre, cohérent, légèrement plus générique (fausses pistes
+  convenues type « embaucher »). Bon rapport qualité/coût pour du volume soigné.
+- HAIKU: le plus concret (24,7 chiffres/sim, 99% d'entreprises uniques),
+  le moins cher, le plus fiable en parse — quelques incohérences secteur/noyau
+  (hybrides étranges) et JSON fragile sur textes longs. Meilleur rapport
+  valeur/coût pour le volume d'entraînement.
+Décision d'usage: banque = haiku (volume) + sonnet (couverture soignée) +
+fable (étalon). Banque actuelle: 2789 simulations générées + 104 cas rédigés
++ grille de 1560 coordonnées. Reste 611 haiku pour compléter les 2000
+(≈ +5 USD ≈ 7 CAD — nécessite accord budget de Jonathan).
+Autorité: Ryokan (analyse), Jonathan (budget résiduel).
