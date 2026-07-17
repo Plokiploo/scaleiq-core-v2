@@ -7,6 +7,15 @@ import { readFileSync, writeFileSync, appendFileSync, mkdirSync, readdirSync, ex
 import { join } from "path";
 import { aiNextQuestion, aiSynthesize, type Turn, type DiagnosticContext, type SynthesisResult } from "./ai";
 
+// Retry simple: les appels moteur peuvent échouer transitoirement (réponse vide, 529).
+async function withRetry<T>(fn: () => Promise<T>, tries = 3): Promise<T> {
+  let last: unknown;
+  for (let i = 0; i < tries; i++) {
+    try { return await fn(); } catch (e) { last = e; await new Promise((r) => setTimeout(r, 1500 * (i + 1))); }
+  }
+  throw last;
+}
+
 const ROOT = process.cwd();
 const GEN = join(ROOT, "knowledge", "simulations", "generated");
 const SPAR = join(ROOT, "knowledge", "sparring");
@@ -71,21 +80,21 @@ Règles: réponds en dirigeant pressé, factuel, 2-4 phrases, JAMAIS de vocabula
 
   // Interview: le VRAI moteur pose les questions; l'acteur répond.
   for (let i = 0; i < 7; i++) {
-    const q = await aiNextQuestion(diagnostic, transcript);
+    const q = await withRetry(() => aiNextQuestion(diagnostic, transcript));
     if (q.done || !q.question) break;
     transcript.push({ speaker: "interviewer", content: q.question });
     const a = await call(client, ACTOR_MODEL, ACTOR_SYS,
       `Historique:\n${transcript.map((t) => `${t.speaker === "interviewer" ? "Consultant" : "Toi"}: ${t.content}`).join("\n")}\n\nRéponds à la dernière question du consultant.`);
     transcript.push({ speaker: "interviewee", content: a });
   }
-  const synthesis: SynthesisResult = await aiSynthesize(diagnostic, transcript);
+  const synthesis: SynthesisResult = await withRetry(() => aiSynthesize(diagnostic, transcript));
 
   // Juge: vérité terrain vs conclusion du moteur.
-  const judgeRaw = await call(client, JUDGE_MODEL,
+  const judgeRaw = await withRetry(() => call(client, JUDGE_MODEL,
     `Tu es juge d'un match d'entraînement diagnostique. Compare la conclusion du moteur à la vérité de la simulation. Sévère mais juste. Réponds UNIQUEMENT en JSON.`,
     `VÉRITÉ (simulation): friction=${sim.friction}; cause=«${sim.cause_probable}»; action attendue=«${sim.action?.quoi}»; fausse piste à éviter=«${sim.fausse_piste}»; invalidation=«${sim.invalidation}»
 CONCLUSION DU MOTEUR: cause probable=«${synthesis.causal_analysis?.probable_cause}»; findings=${JSON.stringify(synthesis.findings?.map((f) => `[${f.kind}] ${f.content}`))}; recommandations=${JSON.stringify(synthesis.recommendations?.map((r) => r.title + ": " + (r as unknown as {action?: string}).action))}
-JSON: {"cause_score":0|1|2,"action_score":0|1|2,"piege_evite":true|false,"epistemique_ok":true|false,"commentaire":"2 phrases max","verdict":"gagné|partiel|perdu"}`, 400);
+JSON: {"cause_score":0|1|2,"action_score":0|1|2,"piege_evite":true|false,"epistemique_ok":true|false,"commentaire":"2 phrases max","verdict":"gagné|partiel|perdu"}`, 400));
   const judge = JSON.parse(judgeRaw.slice(judgeRaw.indexOf("{"), judgeRaw.lastIndexOf("}") + 1));
 
   const s2 = state(); s2.costUsd += tally.costUsd; s2.matches += 1; saveState(s2);
