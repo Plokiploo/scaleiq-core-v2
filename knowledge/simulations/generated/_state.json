@@ -1,8 +1,9 @@
 {
- "costUsd": 25.015683999999993,
+ "costUsd": 33.716711000000025,
  "byTier": {
   "fable": 100,
   "sonnet": 1300,
-  "haiku": 1389
+  "haiku": 2000,
+  "fable-think": 12
  }
 }
