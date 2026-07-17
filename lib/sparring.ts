@@ -90,12 +90,16 @@ Règles: réponds en dirigeant pressé, factuel, 2-4 phrases, JAMAIS de vocabula
   const synthesis: SynthesisResult = await withRetry(() => aiSynthesize(diagnostic, transcript));
 
   // Juge: vérité terrain vs conclusion du moteur.
-  const judgeRaw = await withRetry(() => call(client, JUDGE_MODEL,
-    `Tu es juge d'un match d'entraînement diagnostique. Compare la conclusion du moteur à la vérité de la simulation. Sévère mais juste. Réponds UNIQUEMENT en JSON.`,
-    `VÉRITÉ (simulation): friction=${sim.friction}; cause=«${sim.cause_probable}»; action attendue=«${sim.action?.quoi}»; fausse piste à éviter=«${sim.fausse_piste}»; invalidation=«${sim.invalidation}»
+  const judge = await withRetry(async () => {
+    const raw = await call(client, JUDGE_MODEL,
+      `Tu es juge d'un match d'entraînement diagnostique. Compare la conclusion du moteur à la vérité de la simulation. Sévère mais juste. Réponds UNIQUEMENT en JSON.`,
+      `VÉRITÉ (simulation): friction=${sim.friction}; cause=«${sim.cause_probable}»; action attendue=«${sim.action?.quoi}»; fausse piste à éviter=«${sim.fausse_piste}»; invalidation=«${sim.invalidation}»
 CONCLUSION DU MOTEUR: cause probable=«${synthesis.causal_analysis?.probable_cause}»; findings=${JSON.stringify(synthesis.findings?.map((f) => `[${f.kind}] ${f.content}`))}; recommandations=${JSON.stringify(synthesis.recommendations?.map((r) => r.title + ": " + (r as unknown as {action?: string}).action))}
-JSON: {"cause_score":0|1|2,"action_score":0|1|2,"piege_evite":true|false,"epistemique_ok":true|false,"commentaire":"2 phrases max","verdict":"gagné|partiel|perdu"}`, 400));
-  const judge = JSON.parse(judgeRaw.slice(judgeRaw.indexOf("{"), judgeRaw.lastIndexOf("}") + 1));
+JSON: {"cause_score":0|1|2,"action_score":0|1|2,"piege_evite":true|false,"epistemique_ok":true|false,"commentaire":"2 phrases max","verdict":"gagné|partiel|perdu"}`, 800);
+    const i = raw.indexOf("{"), j = raw.lastIndexOf("}");
+    if (i < 0 || j <= i) throw new Error("juge sans JSON");
+    return JSON.parse(raw.slice(i, j + 1));
+  });
 
   const s2 = state(); s2.costUsd += tally.costUsd; s2.matches += 1; saveState(s2);
   const result = {
