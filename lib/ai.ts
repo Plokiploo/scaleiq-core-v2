@@ -297,7 +297,7 @@ export async function aiSynthesize(
 ): Promise<SynthesisResult> {
   const msg = await client().messages.create({
     model: MODEL,
-    max_tokens: 4096,
+    max_tokens: 8192, // 4096 tronquait la synthèse depuis l'enrichissement du corpus (D-024 debug)
     output_config: { format: { type: "json_schema", schema: SYNTHESIS_SCHEMA }, effort: "high" },
     system: systemWithCorpus("synthese"),
     messages: [
