@@ -396,3 +396,23 @@ tier `fable-think` (thinking budget 12 000 tokens, max_tokens 13 500, quota 12
 coordonnées que le set de comparaison → 4e bras appariable de l'étude
 (mesure de l'apport réel de la réflexion profonde vs Fable standard).
 Autorité: Jonathan (budget), Ryokan (implémentation).
+
+## D-023 (2026-07-16) Verdict fable-think vs fable standard (12 coordonnées appariées)
+Mesures: longueur ×1,9 (3545 vs 1897 chars), concrétude ×2,2 (45,8 vs 20,5
+chiffres/sim), invalidations ×2,2 (428 vs 197 chars). Qualitativement: la
+réflexion profonde produit des mécanismes plus fins (la contrainte « affamée
+et hachée », le savoir tacite qui « ne travaille qu'en pointillés ») et surtout
+des INVALIDATIONS QUANTIFIÉES (seuils mesurables: « si la cadence plafonne à
+2 kits/h en créneau protégé, le goulot est la config elle-même ») — c'est la
+propriété la plus précieuse pour l'entraînement: chaque simulation d'élite
+embarque son protocole de test.
+Décision d'usage: les 12 fable-think = étalon-or du corpus et futurs juges/
+modèles de correction pour l'évaluation du moteur. Pas de génération de volume
+à ce prix (~0,30$/sim).
+Corpus final: 104 cas rédigés + 3412 simulations générées (100 fable, 12
+fable-think, 1300 sonnet, 2000 haiku) + grille 1560 coordonnées.
+Dépense totale: 33,72 USD (~46,5 CAD) — dans le cumul autorisé (30+5+7+5 CAD).
+Prochaine étape proposée: SPARRING — le moteur joue contre des simulations
+tirées au sort (symptôme donné, retrouve-t-il friction/cause/action?), mesuré
+contre l'étalon fable-think, AVANT la première vraie partie.
+Autorité: Ryokan (analyse), Jonathan (validation à venir du sparring).
