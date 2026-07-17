@@ -416,3 +416,18 @@ Prochaine étape proposée: SPARRING — le moteur joue contre des simulations
 tirées au sort (symptôme donné, retrouve-t-il friction/cause/action?), mesuré
 contre l'étalon fable-think, AVANT la première vraie partie.
 Autorité: Ryokan (analyse), Jonathan (validation à venir du sparring).
+
+## D-024 (2026-07-16) Module de sparring: le moteur joue contre sa banque
+Principe: une simulation tirée au sort devient l'adversaire — un LLM acteur
+(Haiku) joue le dirigeant avec la réalité terrain SECRÈTE (observations,
+fausse piste qu'il défend spontanément); le moteur RÉEL (aiNextQuestion/
+aiSynthesize, corpus inclus — aucune copie) mène l'interview et conclut;
+un juge (Sonnet) note contre la vérité: cause (0-2), action (0-2), piège
+évité (la fausse piste), discipline épistémique, verdict gagné/partiel/perdu.
+Traces: knowledge/sparring/results.jsonl + transcripts.jsonl (rejouables).
+Budget SÉPARÉ: _sparring_state.json, plafond 8 USD (~11 CAD) par défaut
+(SPARRING_MAX_USD) — nécessite accord Jonathan avant exécution.
+Coût estimé par match: ~0,15-0,20 USD (moteur Sonnet + acteur Haiku + juge).
+Exécution: route POST /api/sparring/run (pilotage Ryokan) ou
+`npx tsx scripts/run-sparring.ts N` (terminal).
+Autorité: Jonathan (principe validé « oui go »), Ryokan (architecture).
