@@ -9,10 +9,10 @@ const GEN = join(ROOT, "knowledge", "simulations", "generated");
 const STATE = join(GEN, "_state.json");
 
 export const TIERS = {
-  fable: { model: "claude-fable-5", priceIn: 10, priceOut: 50, quota: 100, thinking: 0 },
-  "fable-think": { model: "claude-fable-5", priceIn: 10, priceOut: 50, quota: 12, thinking: 12000 },
-  sonnet: { model: "claude-sonnet-5", priceIn: 2, priceOut: 10, quota: 1300, thinking: 0 },
-  haiku: { model: "claude-haiku-4-5-20251001", priceIn: 1, priceOut: 5, quota: 2000, thinking: 0 },
+  fable: { model: "claude-fable-5", priceIn: 10, priceOut: 50, quota: 100, maxTokens: 1200 },
+  "fable-think": { model: "claude-fable-5", priceIn: 10, priceOut: 50, quota: 12, maxTokens: 13500, effort: "max" as const },
+  sonnet: { model: "claude-sonnet-5", priceIn: 2, priceOut: 10, quota: 1300, maxTokens: 1200 },
+  haiku: { model: "claude-haiku-4-5-20251001", priceIn: 1, priceOut: 5, quota: 2000, maxTokens: 1200 },
 } as const;
 export type Tier = keyof typeof TIERS;
 export const MAX_COST_USD = 34; // D-022: +7 CAD haiku + +5 CAD fable-think autorisés par Jonathan
@@ -109,8 +109,8 @@ export async function generateBatch(tier: Tier, batchSize: number) {
       try {
         const msg = await client.messages.create({
           model: cfg.model,
-          max_tokens: cfg.thinking ? cfg.thinking + 1500 : 1200,
-          ...(cfg.thinking ? { thinking: { type: "enabled" as const, budget_tokens: cfg.thinking } } : {}),
+          max_tokens: cfg.maxTokens,
+          ...("effort" in cfg ? { output_config: { effort: cfg.effort } } : {}),
           system: SYSTEM,
           messages: [{ role: "user", content:
 `Coordonnée: ${coord.id} (${coord.label})

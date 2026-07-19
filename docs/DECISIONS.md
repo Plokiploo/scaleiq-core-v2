@@ -431,3 +431,65 @@ Coût estimé par match: ~0,15-0,20 USD (moteur Sonnet + acteur Haiku + juge).
 Exécution: route POST /api/sparring/run (pilotage Ryokan) ou
 `npx tsx scripts/run-sparring.ts N` (terminal).
 Autorité: Jonathan (principe validé « oui go »), Ryokan (architecture).
+
+## D-025 (2026-07-19) Analyse qualitative des 4 tiers (.jsonl) + sparring propre (25 matchs, juge schéma-fixé)
+
+**Partie 1 — comparatif qualitatif des corpus générés (au-delà de D-021/D-023):**
+- Taux de doublons (titre/entreprise): fable 3% (5), fable-think 0% (0),
+  sonnet 8% (102/1300 — le plus élevé), haiku 3% (57/2000).
+- Incohérence sectorielle haiku (vocabulaire entrepôt/logistique dans une
+  entreprise étiquetée SaaS): 4/2000 = 0,2% — négligeable, le tier reste
+  propre malgré le volume et le prix bas.
+- Taux d'invalidation quantifiée (présence d'un chiffre dans le critère
+  d'invalidation — proxy de testabilité réelle): fable 74%, fable-think
+  100%, **sonnet 28% — nettement faible**, haiku 82%.
+  → Nouveau signal: sonnet est fiable et propre (D-021) mais ses critères
+  d'invalidation sont majoritairement qualitatifs/vagues, pas des seuils
+  mesurables. Sur 1300 simulations (le plus gros tier soigné), c'est un
+  déficit d'entraînement pour la discipline épistémique du moteur
+  ("invalidation" doit être un test, pas une opinion).
+- Confirmation croisée sur 2 coordonnées appariées supplémentaires
+  (S-C1-M-crise-v1, S-C1-M-croissance-v1): fable-think reste le plus
+  spécifique/quantifié, sonnet le plus générique dans sa formulation
+  d'invalidation malgré une cause correcte.
+
+Implication produit: si le prompt de synthèse est un jour affiné pour exiger
+un seuil numérique en critère d'invalidation, le corpus sonnet ne pourra pas
+servir de bon exemple few-shot pour cette dimension — utiliser haiku ou
+fable-think comme référence pour ce point précis.
+
+**Partie 2 — vague de sparring propre (25 matchs, juge JSON-schema, post
+fix D-024):** la première vague (24 matchs) avait un juge qui échouait
+parfois à produire du JSON valide — écartée. Cette vague est la première
+mesure fiable.
+- Verdicts: 5 gagné (20%), 11 partiel (44%), 9 perdu (36%) — n=25.
+- cause_score moyen 1,04/2, action_score moyen 0,84/2 (faible).
+- piège évité (fausse piste déjouée): 88% — le moteur repère bien les
+  fausses pistes évidentes.
+- discipline épistémique (epistemique_ok): 52% — nouveau signal, plus
+  faible que les autres taux; à surveiller (le juge sanctionne probablement
+  des affirmations non ancrées en observation/preuve).
+- Par taille: Moyenne (M) 5 gagné / 5 partiel / 3 perdu (n=13) — seule
+  catégorie où le moteur gagne. Petite (P) 0 gagné / 1 partiel / 3 perdu
+  (n=4). Grande (G) 0 gagné / 5 partiel / 3 perdu (n=8).
+  → Confirme, sur données propres et indépendantes, le constat de la
+  première vague: le moteur ne gagne qu'en taille Moyenne. Il ne franchit
+  pas le pallier requis en Petite (probablement dilution: pas assez de
+  structure formelle à sonder) ni en Grande (probablement l'inverse: cause
+  souvent politique/incitative, hors du niveau mécanisme qu'il atteint).
+- Par friction: F9 0 gagné/4 (confirmé faible), F5 0 gagné/3 (faible),
+  F8 2 gagné/2 perdu/4 (instable), F7 0 gagné/4 (3 partiel — presque
+  toujours proche mais jamais suffisant).
+
+Conclusion combinée D-021→D-025: le corpus de génération est sain (faibles
+doublons, faible incohérence) mais deux dettes d'entraînement distinctes
+sont maintenant identifiées: (a) sonnet — 1300 simulations, sous-invalidées
+quantitativement; (b) le moteur réel — échoue à escalader vers la cause
+en amont (incitatif/politique/structurel) en dehors de la taille Moyenne,
+avec F9/F5/F7 comme frictions les plus fragiles.
+Discipline maintenue: pas de modification du moteur avant ce point — c'était
+la mesure "avant". La correction (prompt de synthèse guidé par les 7
+extractions de livres, notamment Munger/incitatifs, Senge/archétypes,
+Grove/indicateurs appariés) est la prochaine étape proposée, suivie d'une
+nouvelle vague de sparring comparable pour mesurer le delta.
+Autorité: Ryokan (analyse), Jonathan (validation de la correction à venir).
