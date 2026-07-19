@@ -9,12 +9,13 @@ const GEN = join(ROOT, "knowledge", "simulations", "generated");
 const STATE = join(GEN, "_state.json");
 
 export const TIERS = {
-  fable: { model: "claude-fable-5", priceIn: 10, priceOut: 50, quota: 100 },
-  sonnet: { model: "claude-sonnet-5", priceIn: 2, priceOut: 10, quota: 1300 },
-  haiku: { model: "claude-haiku-4-5-20251001", priceIn: 1, priceOut: 5, quota: 2000 },
+  fable: { model: "claude-fable-5", priceIn: 10, priceOut: 50, quota: 100, maxTokens: 1200 },
+  "fable-think": { model: "claude-fable-5", priceIn: 10, priceOut: 50, quota: 12, maxTokens: 13500, effort: "max" as const },
+  sonnet: { model: "claude-sonnet-5", priceIn: 2, priceOut: 10, quota: 1300, maxTokens: 1200 },
+  haiku: { model: "claude-haiku-4-5-20251001", priceIn: 1, priceOut: 5, quota: 2000, maxTokens: 1200 },
 } as const;
 export type Tier = keyof typeof TIERS;
-export const MAX_COST_USD = 25; // ~34.5 CAD — plafond Jonathan 35 CAD (D-020)
+export const MAX_COST_USD = 34; // D-022: +7 CAD haiku + +5 CAD fable-think autorisés par Jonathan
 const COMPARISON_SET = 100; // les N premières coordonnées sont générées par TOUS les tiers
 
 type Coord = { id: string; label: string; mod: string; kernel: string };
@@ -60,7 +61,7 @@ const SECTEURS = ["services B2B", "commerce/retail", "industrie/fabrication", "s
 
 const SYSTEM = `Tu écris des simulations d'investigation opérationnelle pour entraîner un système de diagnostic (ScaleIQ).
 Chaque simulation est une PARTIE plausible et DISTINCTE: entreprise concrète (invente nom, chiffres réalistes), symptôme dans la voix du dirigeant, observations factuelles que révélerait une bonne interview Gemba, une fausse piste tentante, la friction dominante et sa cause, une action simple avec owner, un signal de validation et une CONDITION D'INVALIDATION honnête.
-Règles: réalisme > élégance. La fausse piste doit être vraiment tentante. L'invalidation doit être plausible. Varie voix, secteurs, chiffres. Réponds UNIQUEMENT en JSON conforme, minifié sur UNE SEULE LIGNE (pas de bloc markdown \`\`\`, pas d'indentation, pas de retour à la ligne à l'intérieur du JSON). Reste concis dans chaque champ (une phrase courte) pour rester bien en-deçà de la limite de tokens.`;
+Règles: réalisme > élégance. La fausse piste doit être vraiment tentante. L'invalidation doit être plausible. Varie voix, secteurs, chiffres. Réponds UNIQUEMENT en JSON conforme.`;
 
 // Plan d'attribution: comparaison (100 coords communes) puis coordonnées suivantes réparties.
 function plan(tier: Tier): { coordIdx: number; seed: number; id: string }[] {
@@ -71,7 +72,7 @@ function plan(tier: Tier): { coordIdx: number; seed: number; id: string }[] {
   for (let i = 0; i < COMPARISON_SET && items.length < quota; i++)
     items.push({ coordIdx: i, seed: 1, id: `${_coords![i].id}-v1` });
   // 2) au-delà: zones distinctes par tier pour maximiser la couverture
-  const offset = tier === "sonnet" ? COMPARISON_SET : tier === "haiku" ? 800 : 0;
+  const offset = tier === "sonnet" ? COMPARISON_SET : tier === "haiku" ? 800 : 0; // fable-think: quota<=100 → reste dans le set de comparaison
   let i = COMPARISON_SET + offset, seed = 1;
   while (items.length < quota) {
     if (i >= _coords!.length) { i = COMPARISON_SET; seed++; }
@@ -107,7 +108,10 @@ export async function generateBatch(tier: Tier, batchSize: number) {
       const secteur = SECTEURS[(coord.id.length * 7 + item.seed * 13) % SECTEURS.length];
       try {
         const msg = await client.messages.create({
-          model: cfg.model, max_tokens: 2000, system: SYSTEM,
+          model: cfg.model,
+          max_tokens: cfg.maxTokens,
+          ...("effort" in cfg ? { output_config: { effort: cfg.effort } } : {}),
+          system: SYSTEM,
           messages: [{ role: "user", content:
 `Coordonnée: ${coord.id} (${coord.label})
 Noyau: ${kernel.title} [${kernel.dom}, friction ${kernel.fcode}] — symptôme type: «${kernel.sym}» — action type: ${kernel.act}
