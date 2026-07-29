@@ -166,7 +166,7 @@ async function main() {
     full.status === 200 && d?.interviews?.length >= 1 && d?.findings?.length >= 4 && d?.causal_analyses?.length >= 1 && d?.recommendations?.length >= 1,
     `interviews=${d?.interviews?.length} findings=${d?.findings?.length} analyses=${d?.causal_analyses?.length} recos=${d?.recommendations?.length}`);
   check("11. Trace de raisonnement (decision_events = 14)", events.length === 14,
-    `decision_events=${events.length} expected=14 (${[...new Set(events.map((e: any) => e.event))].join(",")})`);
+    `decision_events=${events.length} expected=14 (${Array.from(new Set(events.map((e: any) => e.event))).join(",")})`);
 
   // -- Guardrails (negative paths) --
   const g1 = await call(findPost, { body: { kind: "evidence", content: "évidence sans niveau" }, params: P });
