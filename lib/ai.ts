@@ -1,9 +1,11 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { readFileSync } from "fs";
 import { join } from "path";
+import { pickModel, logModelUsage } from "./model-routing";
 
-// Modèle configurable (mandat: claude-sonnet-5, fallback possible via env).
-const MODEL = process.env.ANTHROPIC_MODEL || "claude-sonnet-5";
+// Le modèle n'est plus une constante unique: chaque appel choisit son tier via
+// pickModel(step) (OCT-15, policy OCT-11 `model-routing`). Deep est réservé à
+// l'étape critique (synthèse), le reste route vers Light/Standard.
 
 function client(): Anthropic {
   const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -103,8 +105,9 @@ const BOOTSTRAP_SCHEMA = {
 
 export async function aiBootstrap(description: string): Promise<BootstrapResult> {
   if (!description?.trim()) throw new Error("description manquante");
+  const { model, tier } = pickModel("bootstrap");
   const msg = await client().messages.create({
-    model: MODEL,
+    model,
     max_tokens: 1024,
     thinking: { type: "disabled" },
     output_config: { format: { type: "json_schema", schema: BOOTSTRAP_SCHEMA }, effort: "low" },
@@ -116,6 +119,7 @@ export async function aiBootstrap(description: string): Promise<BootstrapResult>
       },
     ],
   });
+  logModelUsage("bootstrap", tier, msg.usage);
   return parseJSON<BootstrapResult>(msg);
 }
 
@@ -166,8 +170,9 @@ export async function aiNextQuestion(
   transcript: Turn[]
 ): Promise<QuestionResult> {
   const askedCount = transcript.filter((t) => t.speaker === "interviewer").length;
+  const { model, tier } = pickModel("next_question");
   const msg = await client().messages.create({
-    model: MODEL,
+    model,
     max_tokens: 512,
     thinking: { type: "disabled" },
     output_config: { format: { type: "json_schema", schema: QUESTION_SCHEMA }, effort: "low" },
@@ -191,6 +196,7 @@ Sinon, pose UNE seule question suivante qui fait avancer concrètement la compr�
       },
     ],
   });
+  logModelUsage("next_question", tier, msg.usage);
   return parseJSON<QuestionResult>(msg);
 }
 
@@ -295,8 +301,9 @@ export async function aiSynthesize(
   diagnostic: DiagnosticContext,
   transcript: Turn[]
 ): Promise<SynthesisResult> {
+  const { model, tier } = pickModel("synthesize");
   const msg = await client().messages.create({
-    model: MODEL,
+    model,
     max_tokens: 8192, // 4096 tronquait la synthèse depuis l'enrichissement du corpus (D-024 debug)
     output_config: { format: { type: "json_schema", schema: SYNTHESIS_SCHEMA }, effort: "high" },
     system: systemWithCorpus("synthese"),
@@ -321,6 +328,7 @@ Reste fidèle au transcript: ne fabrique pas de faits qui n'ont pas été mentio
       },
     ],
   });
+  logModelUsage("synthesize", tier, msg.usage);
   return parseJSON<SynthesisResult>(msg);
 }
 
@@ -355,8 +363,9 @@ export async function aiObserveScreen(
   mediaType: "image/jpeg" | "image/png"
 ): Promise<ObserveScreenResult> {
   if (!imageBase64) throw new Error("image manquante");
+  const { model, tier } = pickModel("observe_screen");
   const msg = await client().messages.create({
-    model: MODEL,
+    model,
     max_tokens: 300,
     thinking: { type: "disabled" },
     output_config: { format: { type: "json_schema", schema: OBSERVE_SCREEN_SCHEMA }, effort: "low" },
@@ -386,5 +395,6 @@ Sinon (bureau vide, contenu non pertinent, redite), réponds relevant=false.`,
       },
     ],
   });
+  logModelUsage("observe_screen", tier, msg.usage);
   return parseJSON<ObserveScreenResult>(msg);
 }
